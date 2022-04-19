@@ -112,7 +112,6 @@ void readPword(const char *filename)
                 {
                     word3[strlen(word3) - 1] = '\0';
                 }
-                // printf(" %s\n", word3);
                 strcpy(PList[Psize], word3);
                 Psize++;
             }
@@ -137,7 +136,6 @@ int main()
     readPword("vanban.txt");
     readStopWord("stopw.txt");
     int currentLine = 1;
-    // printf("%d", checkWord("Yusifiya", PList));
     while (!feof(fptr))
     {
         char line[200];
@@ -171,13 +169,11 @@ int main()
                 else
                 {
                     int a = checkWord(newWord, wordList, index);
-                    // printf("%d \n", a);
                     countList[a][0]++;
                     int b = countList[a][0];
                     countList[a][b] = currentLine;
                 }
             }
-            // printf("%s ", word);
             word = strtok(NULL, " ,;?!+*<>()");
         }
         currentLine++;
@@ -187,7 +183,6 @@ int main()
     for (int i = 0; i < index; i++)
     {
         printf("%s: ", wordList[i]);
-        // printf("%d  ", countList[i][0]);
         for (int j = 0; j <= countList[i][0]; j++)
         {
             printf("%d ", countList[i][j]);
