@@ -71,7 +71,6 @@ void compileBlock2(void)
   else
     compileBlock3();
 }
-
 void compileBlock3(void)
 {
   if (lookAhead->tokenType == KW_VAR)
