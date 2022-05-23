@@ -356,22 +356,20 @@ void exitBlock(void)
 }
 
 Object *lookupObject(char *name)
-{ // Done
+{
+  // DONE
   Scope *scope = symtab->currentScope;
   Object *obj;
-  while (scope != NULL)
+  while (scope)
   {
     obj = findObject(scope->objList, name);
-    if (obj != NULL) // if found
+    if (obj)
       return obj;
-    // if not found enter outer scope
     scope = scope->outer;
   }
   obj = findObject(symtab->globalObjectList, name);
-  if (obj != NULL)
-  {
+  if (obj)
     return obj;
-  }
   return NULL;
 }
 

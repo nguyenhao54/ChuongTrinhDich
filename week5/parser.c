@@ -39,11 +39,11 @@ void eat(TokenType tokenType)
 
 void compileProgram(void)
 {
-  Object *pro;
+
   eat(KW_PROGRAM);
   eat(TK_IDENT);
 
-  pro = createProgramObject(currentToken->string);
+  Object *pro = createProgramObject(currentToken->string);
   enterBlock(pro->progAttrs->scope);
 
   eat(SB_SEMICOLON);
@@ -78,6 +78,7 @@ void compileBlock(void)
       ConstantValue *c = compileConstant();
       constant->constAttrs->value = c;
       declareObject(constant);
+
       eat(SB_SEMICOLON);
     } while (lookAhead->tokenType == TK_IDENT);
 
@@ -99,8 +100,6 @@ void compileBlock2(void)
     do
     {
       eat(TK_IDENT);
-      if (lookupObject(currentToken->string) != NULL)
-        error(ERR_DUPLICATE_IDENT, currentToken->lineNo, currentToken->colNo);
       typeObj = createTypeObject(currentToken->string);
       eat(SB_EQ);
       Type *actualType = compileType();
@@ -127,8 +126,6 @@ void compileBlock3(void)
     do
     {
       eat(TK_IDENT);
-      if (lookupObject(currentToken->string) != NULL)
-        error(ERR_DUPLICATE_IDENT, currentToken->lineNo, currentToken->colNo);
       varObj = createVariableObject(currentToken->string);
       eat(SB_COLON);
       Type *varType = compileType();
@@ -173,8 +170,6 @@ void compileFuncDecl(void)
   Object *funcObj;
   eat(KW_FUNCTION);
   eat(TK_IDENT);
-  if (lookupObject(currentToken->string) != NULL)
-    error(ERR_DUPLICATE_IDENT, currentToken->lineNo, currentToken->colNo);
   funcObj = createFunctionObject(currentToken->string);
   declareObject(funcObj);
   enterBlock(funcObj->funcAttrs->scope);
@@ -195,11 +190,9 @@ void compileProcDecl(void)
   Object *procObj;
   eat(KW_PROCEDURE);
   eat(TK_IDENT);
-  if (lookupObject(currentToken->string) != NULL)
-    error(ERR_DUPLICATE_IDENT, currentToken->lineNo, currentToken->colNo);
   procObj = createProcedureObject(currentToken->string);
   declareObject(procObj);
-  enterBlock(procObj->funcAttrs->scope);
+  enterBlock(procObj->procAttrs->scope);
   compileParams();
   eat(SB_SEMICOLON);
   compileBlock();
@@ -280,12 +273,7 @@ ConstantValue *compileConstant2(void)
   case TK_IDENT:
     eat(TK_IDENT);
     Object *obj = lookupObject(currentToken->string);
-    if (obj->constAttrs->value->type == TP_INT)
-    {
-      constValue = duplicateConstantValue(obj->constAttrs->value);
-    }
-    else
-      error(ERR_UNDECLARED_INT_CONSTANT, currentToken->lineNo, currentToken->colNo);
+    constValue = duplicateConstantValue(obj->constAttrs->value);
     break;
   default:
     error(ERR_INVALID_CONSTANT, lookAhead->lineNo, lookAhead->colNo);
@@ -322,10 +310,10 @@ Type *compileType(void)
   case TK_IDENT:
     eat(TK_IDENT);
     Object *obj = lookupObject(currentToken->string);
-    // if (obj == NULL)
-    // {
-    //   error(ERR_UNDECLARED_TYPE, currentToken->lineNo, currentToken->colNo);
-    // }
+    if (obj == NULL)
+    {
+      error(ERR_UNDECLARED_TYPE, currentToken->lineNo, currentToken->colNo);
+    }
     type = duplicateType(obj->typeAttrs->actualType);
     break;
   default:
@@ -383,8 +371,6 @@ void compileParam(void)
   case TK_IDENT:
     paramKind = PARAM_VALUE;
     eat(TK_IDENT);
-    if (lookupObject(currentToken->string) != NULL)
-      error(ERR_DUPLICATE_IDENT, currentToken->lineNo, currentToken->colNo);
     param = createParameterObject(currentToken->string,
                                   paramKind, symtab->currentScope->owner);
     eat(SB_COLON);
@@ -397,8 +383,6 @@ void compileParam(void)
     eat(KW_VAR);
     paramKind = PARAM_REFERENCE;
     eat(TK_IDENT);
-    if (lookupObject(currentToken->string) != NULL)
-      error(ERR_DUPLICATE_IDENT, currentToken->lineNo, currentToken->colNo);
     param = createParameterObject(currentToken->string,
                                   paramKind, symtab->currentScope->owner);
     eat(SB_COLON);
