@@ -14,125 +14,99 @@ extern Token *currentToken;
 
 Object *lookupObject(char *name)
 {
-  // DONE
   Scope *scope = symtab->currentScope;
   Object *obj;
-  while (scope)
+
+  while (scope != NULL)
   {
     obj = findObject(scope->objList, name);
-    if (obj) // if found then return that obj
+    if (obj != NULL)
       return obj;
-    scope = scope->outer; // if not found enter outer scope
+    scope = scope->outer;
   }
-  // Find in global object list
   obj = findObject(symtab->globalObjectList, name);
-  if (obj)
+  if (obj != NULL)
     return obj;
   return NULL;
 }
 
 void checkFreshIdent(char *name)
 {
-  // DONE
-  // chi tim trong pham vi hien tai
-  Scope *scope = symtab->currentScope;
-  Object *obj = findObject(scope->objList, currentToken->string);
-  if (obj != NULL)
+  if (findObject(symtab->currentScope->objList, name) != NULL)
     error(ERR_DUPLICATE_IDENT, currentToken->lineNo, currentToken->colNo);
 }
 
 Object *checkDeclaredIdent(char *name)
 {
-  // DONE
-  Object *obj = lookupObject(currentToken->string);
+  Object *obj = lookupObject(name);
   if (obj == NULL)
   {
     error(ERR_UNDECLARED_IDENT, currentToken->lineNo, currentToken->colNo);
   }
-
   return obj;
 }
 
 Object *checkDeclaredConstant(char *name)
 {
-  // DONE
-  Object *obj = lookupObject(currentToken->string);
+  Object *obj = lookupObject(name);
   if (obj == NULL)
-  {
     error(ERR_UNDECLARED_CONSTANT, currentToken->lineNo, currentToken->colNo);
-  }
   if (obj->kind != OBJ_CONSTANT)
-  {
     error(ERR_INVALID_CONSTANT, currentToken->lineNo, currentToken->colNo);
-  }
+
   return obj;
 }
 
 Object *checkDeclaredType(char *name)
 {
-  // DONE
-  Object *obj = lookupObject(currentToken->string);
+  Object *obj = lookupObject(name);
   if (obj == NULL)
-  {
     error(ERR_UNDECLARED_TYPE, currentToken->lineNo, currentToken->colNo);
-  }
   if (obj->kind != OBJ_TYPE)
-  {
     error(ERR_INVALID_TYPE, currentToken->lineNo, currentToken->colNo);
-  }
+
   return obj;
 }
 
 Object *checkDeclaredVariable(char *name)
 {
-  // DONE
-  Object *obj = lookupObject(currentToken->string);
+  Object *obj = lookupObject(name);
   if (obj == NULL)
-  {
     error(ERR_UNDECLARED_VARIABLE, currentToken->lineNo, currentToken->colNo);
-  }
   if (obj->kind != OBJ_VARIABLE)
-  {
     error(ERR_INVALID_VARIABLE, currentToken->lineNo, currentToken->colNo);
-  }
+
   return obj;
 }
 
 Object *checkDeclaredFunction(char *name)
 {
-  Object *obj = lookupObject(currentToken->string);
+  Object *obj = lookupObject(name);
   if (obj == NULL)
-  {
     error(ERR_UNDECLARED_FUNCTION, currentToken->lineNo, currentToken->colNo);
-  }
   if (obj->kind != OBJ_FUNCTION)
-  {
     error(ERR_INVALID_FUNCTION, currentToken->lineNo, currentToken->colNo);
-  }
+
   return obj;
 }
 
 Object *checkDeclaredProcedure(char *name)
 {
-  Object *obj = lookupObject(currentToken->string);
+  Object *obj = lookupObject(name);
   if (obj == NULL)
-  {
     error(ERR_UNDECLARED_PROCEDURE, currentToken->lineNo, currentToken->colNo);
-  }
   if (obj->kind != OBJ_PROCEDURE)
-  {
     error(ERR_INVALID_PROCEDURE, currentToken->lineNo, currentToken->colNo);
-  }
+
   return obj;
 }
 
 Object *checkDeclaredLValueIdent(char *name)
 {
-  Object *obj = lookupObject(currentToken->string);
+  Object *obj = lookupObject(name);
   if (obj == NULL)
-  {
     error(ERR_UNDECLARED_IDENT, currentToken->lineNo, currentToken->colNo);
-  }
+
   switch (obj->kind)
   {
   case OBJ_VARIABLE:
@@ -140,12 +114,62 @@ Object *checkDeclaredLValueIdent(char *name)
     break;
   case OBJ_FUNCTION:
     if (obj != symtab->currentScope->owner)
-    {
       error(ERR_INVALID_IDENT, currentToken->lineNo, currentToken->colNo);
-    }
     break;
   default:
-    break;
+    error(ERR_INVALID_IDENT, currentToken->lineNo, currentToken->colNo);
   }
+
   return obj;
+}
+
+void checkIntType(Type *type)
+{
+  if ((type != NULL) && type->typeClass == TP_INT)
+    return;
+  else
+    error(ERR_TYPE_INCONSISTENCY, currentToken->lineNo, currentToken->colNo);
+}
+
+void checkCharType(Type *type)
+{
+  // DONE
+  if ((type != NULL) && type->typeClass == TP_CHAR)
+  {
+    return;
+  }
+  else
+    error(ERR_TYPE_INCONSISTENCY, currentToken->lineNo, currentToken->colNo);
+}
+
+void checkBasicType(Type *type)
+{
+  // TODO
+  if ((type != NULL) && (type->typeClass == TP_CHAR || type->typeClass == TP_INT))
+  {
+    return;
+  }
+  else
+    error(ERR_TYPE_INCONSISTENCY, currentToken->lineNo, currentToken->colNo);
+}
+
+void checkArrayType(Type *type)
+{
+  // TODO
+  if ((type != NULL) && type->typeClass == TP_ARRAY)
+  {
+    return;
+  }
+  else
+    error(ERR_TYPE_INCONSISTENCY, currentToken->lineNo, currentToken->colNo);
+}
+
+void checkTypeEquality(Type *type1, Type *type2)
+{
+  if (compareType(type1, type2) == 1)
+  {
+    return;
+  }
+  else
+    error(ERR_TYPE_INCONSISTENCY, currentToken->lineNo, currentToken->colNo);
 }
